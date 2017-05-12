@@ -1,0 +1,108 @@
+NAME: Brian Be
+EMAIL: bebrian458@gmail.com
+ID: 204612203
+
+// Slip days
+I will be using one of my 3 remaining slip days.
+
+// Brief Overview of each file
+lab2_add.c
+	A C program that tests the power and problems of multithreading when updating a
+	shared variable (adding either 1 or -1).
+lab2_list.c
+	A C program that tests the power and problems of multithreading when updating a
+	linked list. This includes insertion, deletion, searching, and lookups.
+SortedList.c
+	A C module that manages the insertion, deletion, searching and lookups, used in
+	lab2_list.c
+SortedList.h
+	A header file that includes all of the functions and external variables for the 
+	SortedList module.
+Makefile
+	build: compiles all programs
+	tests: runs over 200 specified test cases to generate CSV results
+	graphs: uses the supplied CSV results to create graphs using provided scripts
+	dist: create the deliverable tarball
+	delete all generated programs and output from this Makefile
+lab2_add.csv
+	containing all of my results for all of the Part-1 tests, provided by TA.
+lab2_list.csv
+	containing all of my results for all of the Part-2 tests, provided by TA.
+lab2_add-1.png 
+	threads and iterations required to generate a failure (with and without yields)
+lab2_add-2.png
+	average time per operation with and without yields.
+lab2_add-3.png
+	average time per (single threaded) operation vs. the number of iterations.
+lab2_add-4.png
+	threads and iterations that can run successfully with yields under each of the 		synchronization options.
+lab2_add-5.png
+	average time per (protected) operation vs. the number of threads.
+lab2_list-1.png
+	average time per (single threaded) unprotected operation vs. number of iterations (illustrating the correction of the per-operation cost for the list length).
+lab2_list-2.png
+	threads and iterations required to generate a failure (with and without yields).
+lab2_list-3.png
+	iterations that can run (protected) without failure.
+lab2_list-4.png
+	(length-adjusted) cost per operation vs the number of threads for the various 		synchronization options.
+
+
+// Questions
+Q 2.1.1 
+Why does it take many iterations before errors are seen?
+Why does a significantly smaller number of iterations so seldom fail?
+
+With such a small sample size(small number of iterations), there is very low chance
+for conflict. Since there are less jobs(iterations) for each thread, some threads will finish faster than others, leaving less and less threads to compete for resources, and
+thus there will be less conflict and errors.
+
+Q 2.1.2
+Why are the —yield runs so much slower?
+Where is the additional time going?
+Is it possible to get valid per-operation timings if we are using the —yield option?
+If so, explain how. If not, explain why not.
+
+When a thread yields, it relinquishes the CPU and moves to the end of the queue. It
+will then wait for it’s turn to use the CPU again to resume execution and finish its
+job. All of the additional time is going into the context switching between threads.
+The constant saving and loading of registers and states take up a lot of time. It is
+not possible to get valid per-operation timings because it doesn’t account for the 
+context switching time.
+
+Q 2.1.3
+Why does the average cost per operation drop with increasing iterations?
+If the cost per iteration is a function of the number of iterations, how do we know
+how many iterations to run (or what the “correct” cost is)?
+
+The cost includes the overhead time for creating the threads. The cost of creating the threads become amortized as more and more iterations are run. By looking at the graph
+of cost of operations vs iterations, we can see where the graph starts to level out
+to a horizontal slope. That is the point where we can see the full amortization of the
+threads and “correct” average cost per operation.
+
+Q 2.1.4
+Why do all of the options perform similarly for low numbers?
+Why do the three protected operations slow down as the number of threads rises?
+
+All of the options perform similarly for low numbers because there is little to no
+contention for resources. The three protected operations slow down as the number of
+threads rises because there is more contention for resources.
+
+Q 2.2.1 - scalability of Mutex
+Compare the variation in time per mutex-protected operation vs the number of threads in Part-1 (adds) and Part-2 (sorted lists).
+Comment on the general shapes of the curves, and explain why they have this shape.
+Comment on the relative rates of increase and differences in the shapes of the curves, and offer an explanation for these differences.
+
+In both graphs, the cost of mutex-protected operations increase as the number of threads increase. This is because there is more contention between the threads to acquire the lock. The amount of time for each thread to wait for the lock to be released increases as
+there are more and more threads.
+
+Q 2.2.2 - scalability of spin locks
+Compare the variation in time per protected operation vs the number of threads for list operations protected by Mutex vs Spin locks. Comment on the general shapes of the curves, and explain why they have this shape.
+Comment on the relative rates of increase and differences in the shapes of the curves, and offer an explanation for these differences.
+
+Both the cost of the mutex and the spin-lock protected operations increase as the number of threads increase. This is because as the number of threads increase, there is more contention between the threads to acquire the locks. The difference is that the spin-locks cost more time per operation than mutexes as the number of threads increase, and thus represents the faster increase(slope) seen in the cost for spin-locks rather than mutexes.  This is because threads holding spin locks will spin a lot while waiting for a lock, wasting CPU cycles. For mutexes, the threads are put to sleep when they are not run, so they do not waste CPU cycles.
+
+// Research
+Used TA powerpoint and Arpaci’s chapters for reference for lock code
+Used http://www.tek-tips.com/viewthread.cfm?qid=1259127 for ideas to make random key
+Used stack overflow to check c syntax.
