@@ -15,6 +15,7 @@ char* m_yield;
 pthread_mutex_t mutex;
 SortedList_t *list;
 SortedListElement_t *elements;
+long long *locktimers;
 
 #define MAX_KEY_LEN 15
 #define MIN_KEY_LEN 8
@@ -85,6 +86,9 @@ void make_keys(){
 // Thread routine
 void* worker(void* tID){
 
+	// Lock timers
+	struct timespec lock_start, lock_end;
+
 	// Insert elements into list
 
 	/* Fine Grained Locking */
@@ -119,7 +123,22 @@ void* worker(void* tID){
 	
 	// Mutex
 	case 'm':
+		
+		// Time the wait for thread to acquire mutex
+		if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+			fprintf(stderr, "Error getting lock start time\n");
+			exit(1);
+		}
 		pthread_mutex_lock(&mutex);
+		if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+			fprintf(stderr, "Error getting lock end time\n");
+			exit(1);
+		}
+
+		// Calculate wait time
+		long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+		locktimers[*(int*)tID] = wait_time;
+
 		break;
 	
 	// Spin-lock
@@ -266,6 +285,13 @@ int main(int argc, char *argv[]){
 	list->next = list;
 	list->prev = list;
 
+	// Allocate memory for a lock timer for each thread
+	locktimers = malloc(numthreads*sizeof(long long));
+	if(locktimers == NULL){
+		fprintf(stderr, "Error allocating memory for locktimers\n");
+		exit(1);
+	}
+
 	// Create and initialize with random keys the required number of list elements
 	numelems = numthreads * numIters;
 	elements = malloc(numelems * sizeof(SortedListElement_t));
@@ -306,6 +332,7 @@ int main(int argc, char *argv[]){
 			free(list);
 			free(elements);
 			free(threads);
+			free(locktimers);
 			exit(1);
 		}
 	}
@@ -320,6 +347,7 @@ int main(int argc, char *argv[]){
 			free(list);
 			free(elements);
 			free(threads);
+			free(locktimers);
 			exit(1);
 		}
 	}
@@ -329,12 +357,6 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "Error stopping timer\n");
 		exit(1);
 	}
-
-	// Free allocated memory
-	free(tIDs);
-	free(list);
-	free(elements);
-	free(threads);
 
 	// Check if the length of list is zero
 	if(listlen != 0){
@@ -346,7 +368,7 @@ int main(int argc, char *argv[]){
 	int numops = numthreads * numIters * 3;
 	long long total_time = 1000000000 * (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec);
 	long long avg_time_per_op = total_time/numops;
-
+	
 	// Create name
 	char message[15] = "list";
 	
@@ -387,8 +409,29 @@ int main(int argc, char *argv[]){
 	}
 
 	// Print CSV
-	fprintf(stdout, "%s,%d,%d,%d,%d,%lld,%lld\n",
+	fprintf(stdout, "%s,%d,%d,%d,%d,%lld,%lld",
 		message,numthreads,numIters,numlists,numops,total_time,avg_time_per_op);
+
+	// Calculations for avg mutex acquiring time
+	if(m_sync == 'm'){
+		long long total_wait_time = 0;
+		int k = 0;
+		for(k = 0; k < numthreads; k++){
+			total_wait_time += locktimers[k];
+		}
+		long long avg_wait_per_lock = total_wait_time/numthreads; // Each thread only had one lock op
+		fprintf(stdout, ",%lld", avg_wait_per_lock);
+	}
+
+	// End of message
+	fprintf(stdout, "\n");
+
+	// Free allocated memory
+	free(tIDs);
+	free(list);
+	free(elements);
+	free(threads);
+	free(locktimers);
 
 	exit(0);
 }
