@@ -1,6 +1,6 @@
 CC = gcc
-DEBUG = 
-LFLAGS = -pthread
+DEBUG = -g 
+LFLAGS = -pthread 
 DIST = lab2_add.c lab2_list.c SortedList.c SortedList.h README Makefile *.png *.csv
 
 # source code
@@ -153,7 +153,14 @@ tests: build
 	./lab2_list --threads=24 --iterations=1000 --sync=s >> lab2_list.csv
 
 graphs: build
-	gnuplot lab2_list.gp 
+	gnuplot lab2_list.gp
+
+profile: lab2_list Makefile
+	-rm -f ./raw.gperf
+	LD_PRELOAD=/u/eng/ugrad/beb/lib/libprofiler.so CPUPROFILE=./raw.gperf ./lab2_list --threads=12 --iterations=1000 --sync=s
+	pprof --text ./lab2_list ./raw.gperf > profile.out
+	pprof --list=worker ./lab2_list ./raw.gperf >> profile.out
+	rm -f ./raw.gperf
 
 dist:
 	tar -czf lab2a-204612203.tar.gz $(DIST)

@@ -1,0 +1,272 @@
+Total: 36 samples
+      27  75.0%  75.0%       36 100.0% worker
+       7  19.4%  94.4%        7  19.4% __strcmp_sse42
+       2   5.6% 100.0%        9  25.0% SortedList_insert
+       0   0.0% 100.0%       36 100.0% __clone
+       0   0.0% 100.0%       36 100.0% start_thread
+ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
+    27     36 Total samples (flat / cumulative)
+     .      .   81: 		free(rand_key);
+     .      .   82: 	}
+     .      .   83: }
+     .      .   84: 
+     .      .   85: // Thread routine
+---
+     .      .   86: void* worker(void* tID){
+     .      .   87: 
+     .      .   88: 	// Insert elements into list
+     .      .   89: 
+     .      .   90: 	/* Fine Grained Locking */
+     .      .   91: 	// int i;
+     .      .   92: 	// for(i = *(int*)tID; i < numelems; i+= numthreads){
+     .      .   93: 	// 	switch(m_sync){
+     .      .   94: 	//		
+     .      .   95: 	// 		// Mutex
+     .      .   96: 	// 		case 'm':
+     .      .   97: 	// 			pthread_mutex_lock(&mutex);
+     .      .   98: 	// 			SortedList_insert(list, &elements[i]);
+     .      .   99: 	// 			pthread_mutex_unlock(&mutex);
+     .      .  100: 	// 			break;
+     .      .  101: 	//		
+     .      .  102: 	// 		// Spin-lock
+     .      .  103: 	// 		case 's':
+     .      .  104: 	// 			while(__sync_lock_test_and_set(&spin_lock, 1))
+     .      .  105: 	// 				;
+     .      .  106: 	// 			SortedList_insert(list, &elements[i]);
+     .      .  107: 	// 			__sync_lock_release(&spin_lock);
+     .      .  108: 	// 			break;
+     .      .  109: 	//
+     .      .  110: 	// 		// Without locks
+     .      .  111: 	// 		default:
+     .      .  112: 	// 			SortedList_insert(list, &elements[i]);
+     .      .  113: 	// 			break;
+     .      .  114: 	// 	}
+     .      .  115: 	// }
+     .      .  116: 
+     .      .  117: 	/* Course Grained Locking */
+     .      .  118: 	switch(m_sync){
+     .      .  119: 	
+     .      .  120: 	// Mutex
+     .      .  121: 	case 'm':
+     .      .  122: 		pthread_mutex_lock(&mutex);
+     .      .  123: 		break;
+     .      .  124: 	
+     .      .  125: 	// Spin-lock
+     .      .  126: 	case 's':
+    26     26  127: 		while(__sync_lock_test_and_set(&spin_lock, 1))
+     .      .  128: 			;
+     .      .  129: 		break;
+     .      .  130: 
+     .      .  131: 	// Without locks
+     .      .  132: 	default:
+     .      .  133: 		break;
+     .      .  134: 	}
+     .      .  135: 
+     .      .  136: 	int i;
+     .      .  137: 	for(i = *(int*)tID; i < numelems; i+= numthreads)
+     .      9  138: 		SortedList_insert(list, &elements[i]);
+     .      .  139: 
+     .      .  140: 	// Get the list length
+     .      .  141: 	listlen = SortedList_length(list);
+     .      .  142: 	
+     .      .  143: 	// Check if the length of list is zero
+     .      .  144: 	if(listlen == -1){
+     .      .  145: 		fprintf(stderr, "Error: List length is corrupted after insertion; it is: %d\n",listlen);
+     .      .  146: 		exit(2);
+     .      .  147: 	}
+     .      .  148: 
+     .      .  149: 	// Look up and delete each of the keys it had previously inserted
+     .      .  150: 	
+     .      .  151:    	/* Fine Grained Locking */
+     .      .  152: 	// int j;
+     .      .  153: 	// for(j = *(int*)tID; j < numelems; j+= numthreads){
+     .      .  154: 	// 	switch(m_sync){
+     .      .  155: 	//
+     .      .  156: 	// 		// Mutex
+     .      .  157: 	// 		case 'm':
+     .      .  158: 	// 			pthread_mutex_lock(&mutex);
+     .      .  159: 	// 			SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  160: 	// 			pthread_mutex_unlock(&mutex);
+     .      .  161: 	//
+     .      .  162: 	// 		// Spin-lock
+     .      .  163: 	// 		case 's':
+     .      .  164: 	// 			while(__sync_lock_test_and_set(&spin_lock, 1))
+     .      .  165: 	// 				;
+     .      .  166: 	// 			SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  167: 	// 			__sync_lock_release(&spin_lock);
+     .      .  168: 	//
+     .      .  169: 	// 		// Without locks
+     .      .  170: 	// 		default:
+     .      .  171: 	// 			SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  172: 	// 			break;
+     .      .  173: 	// 	}
+     .      .  174: 	// }
+     .      .  175: 
+     .      .  176: 
+     .      .  177: 	// Course Grained Locking
+     .      .  178: 	int j;
+     .      .  179: 	for(j = *(int*)tID; j < numelems; j+= numthreads)
+     1      1  180: 		SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  181: 
+     .      .  182: 	switch(m_sync){
+     .      .  183: 	
+     .      .  184: 		// Mutex
+     .      .  185: 		case 'm':
+     .      .  186: 			pthread_mutex_unlock(&mutex);
+     .      .  187: 			break;
+     .      .  188: 		
+     .      .  189: 		// Spin-lock
+     .      .  190: 		case 's':
+     .      .  191: 			__sync_lock_release(&spin_lock);
+     .      .  192: 			break;
+     .      .  193: 
+     .      .  194: 		// Without locks
+     .      .  195: 		default:
+     .      .  196: 			break;
+     .      .  197: 	}
+     .      .  198: 
+     .      .  199: 
+     .      .  200: 	// Get the list length
+     .      .  201: 	listlen = SortedList_length(list);
+     .      .  202: 
+     .      .  203: 	return NULL;
+     .      .  204: }	
+---
+     .      .  205: 
+     .      .  206: // Main routine 
+     .      .  207: int main(int argc, char *argv[]){
+     .      .  208: 
+     .      .  209: 	// Default values
+ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
+    27     36 Total samples (flat / cumulative)
+     .      .   81: 		free(rand_key);
+     .      .   82: 	}
+     .      .   83: }
+     .      .   84: 
+     .      .   85: // Thread routine
+---
+     .      .   86: void* worker(void* tID){
+     .      .   87: 
+     .      .   88: 	// Insert elements into list
+     .      .   89: 
+     .      .   90: 	/* Fine Grained Locking */
+     .      .   91: 	// int i;
+     .      .   92: 	// for(i = *(int*)tID; i < numelems; i+= numthreads){
+     .      .   93: 	// 	switch(m_sync){
+     .      .   94: 	//		
+     .      .   95: 	// 		// Mutex
+     .      .   96: 	// 		case 'm':
+     .      .   97: 	// 			pthread_mutex_lock(&mutex);
+     .      .   98: 	// 			SortedList_insert(list, &elements[i]);
+     .      .   99: 	// 			pthread_mutex_unlock(&mutex);
+     .      .  100: 	// 			break;
+     .      .  101: 	//		
+     .      .  102: 	// 		// Spin-lock
+     .      .  103: 	// 		case 's':
+     .      .  104: 	// 			while(__sync_lock_test_and_set(&spin_lock, 1))
+     .      .  105: 	// 				;
+     .      .  106: 	// 			SortedList_insert(list, &elements[i]);
+     .      .  107: 	// 			__sync_lock_release(&spin_lock);
+     .      .  108: 	// 			break;
+     .      .  109: 	//
+     .      .  110: 	// 		// Without locks
+     .      .  111: 	// 		default:
+     .      .  112: 	// 			SortedList_insert(list, &elements[i]);
+     .      .  113: 	// 			break;
+     .      .  114: 	// 	}
+     .      .  115: 	// }
+     .      .  116: 
+     .      .  117: 	/* Course Grained Locking */
+     .      .  118: 	switch(m_sync){
+     .      .  119: 	
+     .      .  120: 	// Mutex
+     .      .  121: 	case 'm':
+     .      .  122: 		pthread_mutex_lock(&mutex);
+     .      .  123: 		break;
+     .      .  124: 	
+     .      .  125: 	// Spin-lock
+     .      .  126: 	case 's':
+    26     26  127: 		while(__sync_lock_test_and_set(&spin_lock, 1))
+     .      .  128: 			;
+     .      .  129: 		break;
+     .      .  130: 
+     .      .  131: 	// Without locks
+     .      .  132: 	default:
+     .      .  133: 		break;
+     .      .  134: 	}
+     .      .  135: 
+     .      .  136: 	int i;
+     .      .  137: 	for(i = *(int*)tID; i < numelems; i+= numthreads)
+     .      9  138: 		SortedList_insert(list, &elements[i]);
+     .      .  139: 
+     .      .  140: 	// Get the list length
+     .      .  141: 	listlen = SortedList_length(list);
+     .      .  142: 	
+     .      .  143: 	// Check if the length of list is zero
+     .      .  144: 	if(listlen == -1){
+     .      .  145: 		fprintf(stderr, "Error: List length is corrupted after insertion; it is: %d\n",listlen);
+     .      .  146: 		exit(2);
+     .      .  147: 	}
+     .      .  148: 
+     .      .  149: 	// Look up and delete each of the keys it had previously inserted
+     .      .  150: 	
+     .      .  151:    	/* Fine Grained Locking */
+     .      .  152: 	// int j;
+     .      .  153: 	// for(j = *(int*)tID; j < numelems; j+= numthreads){
+     .      .  154: 	// 	switch(m_sync){
+     .      .  155: 	//
+     .      .  156: 	// 		// Mutex
+     .      .  157: 	// 		case 'm':
+     .      .  158: 	// 			pthread_mutex_lock(&mutex);
+     .      .  159: 	// 			SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  160: 	// 			pthread_mutex_unlock(&mutex);
+     .      .  161: 	//
+     .      .  162: 	// 		// Spin-lock
+     .      .  163: 	// 		case 's':
+     .      .  164: 	// 			while(__sync_lock_test_and_set(&spin_lock, 1))
+     .      .  165: 	// 				;
+     .      .  166: 	// 			SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  167: 	// 			__sync_lock_release(&spin_lock);
+     .      .  168: 	//
+     .      .  169: 	// 		// Without locks
+     .      .  170: 	// 		default:
+     .      .  171: 	// 			SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  172: 	// 			break;
+     .      .  173: 	// 	}
+     .      .  174: 	// }
+     .      .  175: 
+     .      .  176: 
+     .      .  177: 	// Course Grained Locking
+     .      .  178: 	int j;
+     .      .  179: 	for(j = *(int*)tID; j < numelems; j+= numthreads)
+     1      1  180: 		SortedList_delete(SortedList_lookup(list, elements[j].key));
+     .      .  181: 
+     .      .  182: 	switch(m_sync){
+     .      .  183: 	
+     .      .  184: 		// Mutex
+     .      .  185: 		case 'm':
+     .      .  186: 			pthread_mutex_unlock(&mutex);
+     .      .  187: 			break;
+     .      .  188: 		
+     .      .  189: 		// Spin-lock
+     .      .  190: 		case 's':
+     .      .  191: 			__sync_lock_release(&spin_lock);
+     .      .  192: 			break;
+     .      .  193: 
+     .      .  194: 		// Without locks
+     .      .  195: 		default:
+     .      .  196: 			break;
+     .      .  197: 	}
+     .      .  198: 
+     .      .  199: 
+     .      .  200: 	// Get the list length
+     .      .  201: 	listlen = SortedList_length(list);
+     .      .  202: 
+     .      .  203: 	return NULL;
+     .      .  204: }	
+---
+     .      .  205: 
+     .      .  206: // Main routine 
+     .      .  207: int main(int argc, char *argv[]){
+     .      .  208: 
+     .      .  209: 	// Default values
