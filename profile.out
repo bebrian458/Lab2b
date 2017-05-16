@@ -1,11 +1,12 @@
 Total: 37 samples
-      28  75.7%  75.7%       37 100.0% worker
-       8  21.6%  97.3%        8  21.6% __strcmp_sse42
-       1   2.7% 100.0%        9  24.3% SortedList_insert
+      25  67.6%  67.6%       37 100.0% worker
+       8  21.6%  89.2%        8  21.6% __strcmp_sse42
+       3   8.1%  97.3%       12  32.4% SortedList_insert
+       1   2.7% 100.0%        1   2.7% _init
        0   0.0% 100.0%       37 100.0% __clone
        0   0.0% 100.0%       37 100.0% start_thread
 ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
-    28     37 Total samples (flat / cumulative)
+    25     37 Total samples (flat / cumulative)
      .      .   82: 		free(rand_key);
      .      .   83: 	}
      .      .   84: }
@@ -71,7 +72,7 @@ ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
      .      .  143: 	
      .      .  144: 	// Spin-lock
      .      .  145: 	case 's':
-    27     27  146: 		while(__sync_lock_test_and_set(&spin_lock, 1))
+    25     25  146: 		while(__sync_lock_test_and_set(&spin_lock, 1))
      .      .  147: 			;
      .      .  148: 		break;
      .      .  149: 
@@ -81,8 +82,8 @@ ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
      .      .  153: 	}
      .      .  154: 
      .      .  155: 	int i;
-     1      1  156: 	for(i = *(int*)tID; i < numelems; i+= numthreads)
-     .      9  157: 		SortedList_insert(list, &elements[i]);
+     .      .  156: 	for(i = *(int*)tID; i < numelems; i+= numthreads)
+     .     12  157: 		SortedList_insert(list, &elements[i]);
      .      .  158: 
      .      .  159: 	// Get the list length
      .      .  160: 	listlen = SortedList_length(list);
@@ -156,7 +157,7 @@ ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
      .      .  227: 
      .      .  228: 	// Default values
 ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
-    28     37 Total samples (flat / cumulative)
+    25     37 Total samples (flat / cumulative)
      .      .   82: 		free(rand_key);
      .      .   83: 	}
      .      .   84: }
@@ -222,7 +223,7 @@ ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
      .      .  143: 	
      .      .  144: 	// Spin-lock
      .      .  145: 	case 's':
-    27     27  146: 		while(__sync_lock_test_and_set(&spin_lock, 1))
+    25     25  146: 		while(__sync_lock_test_and_set(&spin_lock, 1))
      .      .  147: 			;
      .      .  148: 		break;
      .      .  149: 
@@ -232,8 +233,8 @@ ROUTINE ====================== worker in /u/eng/ugrad/beb/lab2b/lab2_list.c
      .      .  153: 	}
      .      .  154: 
      .      .  155: 	int i;
-     1      1  156: 	for(i = *(int*)tID; i < numelems; i+= numthreads)
-     .      9  157: 		SortedList_insert(list, &elements[i]);
+     .      .  156: 	for(i = *(int*)tID; i < numelems; i+= numthreads)
+     .     12  157: 		SortedList_insert(list, &elements[i]);
      .      .  158: 
      .      .  159: 	// Get the list length
      .      .  160: 	listlen = SortedList_length(list);

@@ -127,14 +127,14 @@ tests: build
 	-./lab2_list --threads=12 --iterations=8   --yield=dl >> lab2_list.csv
 	-./lab2_list --threads=12 --iterations=16  --yield=dl >> lab2_list.csv
 #
-	./lab2_list --threads=12 --iterations=32 --yield=i  --sync=m >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=d  --sync=m >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=il --sync=m >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=dl --sync=m >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=i  --sync=s >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=d  --sync=s >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=il --sync=s >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=32 --yield=dl --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=i  --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=d  --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=il --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=dl --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=i  --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=d  --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=il --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=32 --yield=dl --sync=s >> lab2_list.csv
 #
 	./lab2_list --threads=1  --iterations=1000          >> lab2_list.csv
 	./lab2_list --threads=1  --iterations=1000 --sync=m >> lab2_list.csv
