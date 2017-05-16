@@ -54,9 +54,9 @@ set logscale y 10
 set output 'lab2b_2.png'
 # note that unsuccessful runs should have produced no output
 plot \
-     "< grep list-none-m lab2_list.csv" using ($2):($7) \
+     "< grep -E 'list-none-m,[0-9]*,1000,1,' lab2_list.csv" using ($2):($7) \
 	title 'Time per Op' with linespoints lc rgb 'green', \
-	 "< grep list-none-m lab2_list.csv" using ($2):($8) \
+	 "< grep -E 'list-none-m,[0-9]*,1000,1,' lab2_list.csv" using ($2):($8) \
 	title 'Avg Wait-For-Lock Time' with linespoints lc rgb 'blue'
     
      
