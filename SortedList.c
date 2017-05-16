@@ -42,11 +42,11 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element){
 int SortedList_delete(SortedListElement_t *element){
 
 	// If there is no element to delete, do nothing
-	if(element == NULL)
-		return 0;
+	if(element == NULL || element->key == NULL)
+		return 1;
 
 	// Check to make sure pointers are not corrupted
-	if(element->prev->next == element->next->prev){
+	if(element->prev->next == element && element->next->prev == element){
 
 		if(opt_yield & DELETE_YIELD)
 			sched_yield();
@@ -64,7 +64,7 @@ int SortedList_delete(SortedListElement_t *element){
 SortedListElement_t *SortedList_lookup(SortedList_t *list, const char *key){
 
 	// If there is no list or no key, do nothing
-	if(list == NULL || key == NULL)
+	if(list == NULL || list->key != NULL)
 		return NULL;
 
 	// Start from where head's (list) next is pointing to
@@ -96,7 +96,7 @@ int SortedList_length(SortedList_t *list){
 
 	// If there is no list, do nothing
 	if(list == NULL || list->key != NULL)
-		return counter;
+		return -1;
 
 	// Start from where head's (list) next is pointing to
 	SortedListElement_t *curr = list->next;
@@ -106,14 +106,14 @@ int SortedList_length(SortedList_t *list){
 	while(curr != list){
 
 		// Check for corrupted pointers around curr element
-		if(curr->prev->next != curr->next->prev)
+		if(curr->prev->next != curr || curr->next->prev != curr)
 			return -1;
-
-		if(opt_yield & LOOKUP_YIELD)
-			sched_yield();
 
 		// Update counter
 		counter++;
+
+		if(opt_yield & LOOKUP_YIELD)
+			sched_yield();
 
 		// Otherwise, move on to the next thing in the list
 		curr = curr->next;

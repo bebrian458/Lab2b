@@ -125,7 +125,22 @@ void* worker(void* tID){
 			// Mutex
 			case 'm':
 				curr_mutex = &sublist->mutex;
+				
+				// Time the wait for thread to acquire mutex
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+					fprintf(stderr, "Error getting lock start time\n");
+					exit(1);
+				}
 				pthread_mutex_lock(curr_mutex);
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+					fprintf(stderr, "Error getting lock end time\n");
+					exit(1);
+				}
+
+				// Calculate wait time
+				long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+				locktimers[*(int*)tID] += wait_time;
+
 				SortedList_insert(&sublist->list, &elements[i]);
 				pthread_mutex_unlock(curr_mutex);
 				break;
@@ -198,11 +213,23 @@ void* worker(void* tID){
 		// Mutex
 		case 'm':
 
+
+			// Time the wait for thread to acquire mutex
+			if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+				fprintf(stderr, "Error getting lock start time\n");
+				exit(1);
+			}
 			// First, acquire all of the locks
 			for(k = 0; k < numlists; k++){
-				curr_mutex = &sublist_arr[k].mutex;
-				pthread_mutex_lock(curr_mutex);
+				pthread_mutex_lock(&sublist_arr[k].mutex);
 			}
+			if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+				fprintf(stderr, "Error getting lock end time\n");
+				exit(1);
+			}
+			// Calculate wait time
+			long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+			locktimers[*(int*)tID] += wait_time;
 
 			// Then, safely iterate the list without sudden updates
 			for(k = 0; k < numlists; k++){
@@ -216,9 +243,9 @@ void* worker(void* tID){
 
 			// Lastly, release all of the locks
 			for(k = 0; k < numlists; k++){
-				curr_mutex = &sublist_arr[k].mutex;
-				pthread_mutex_unlock(curr_mutex);
+				pthread_mutex_unlock(&sublist_arr[k].mutex);
 			}
+			break;
 
 		// Spin-lock
 		case 's':
@@ -245,6 +272,7 @@ void* worker(void* tID){
 				curr_spin_lock = &sublist_arr[k].spin_lock;
 				__sync_lock_release(curr_spin_lock);
 			}
+			break;
 
 		// Without locks
 		default:
@@ -260,6 +288,7 @@ void* worker(void* tID){
 				}
 				listlen += ret;
 			}
+			break;
 	}
 
 //	fprintf(stderr, "After listlen\n");
@@ -316,7 +345,22 @@ void* worker(void* tID){
 			// Mutex
 			case 'm':
 				curr_mutex = &sublist->mutex;
+
+				// Time the wait for thread to acquire mutex
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+					fprintf(stderr, "Error getting lock start time\n");
+					exit(1);
+				}
 				pthread_mutex_lock(curr_mutex);
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+					fprintf(stderr, "Error getting lock end time\n");
+					exit(1);
+				}
+
+				// Calculate wait time
+				long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+				locktimers[*(int*)tID] += wait_time;
+
 				ret_elem = SortedList_lookup(&sublist->list, elements[j].key);
 				if(ret_elem == NULL){
 					fprintf(stderr, "Error looking up element for deletion\n");
@@ -493,6 +537,10 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
+	// Zero the lock timers array
+	for(l = 0; l < numthreads; l++)
+		locktimers[l] = 0;
+
 	// Allocate memory for threads
 	pthread_t *threads = malloc(numthreads*sizeof(pthread_t));
 	if(threads == NULL){
@@ -644,7 +692,8 @@ int main(int argc, char *argv[]){
 		for(k = 0; k < numthreads; k++){
 			total_wait_time += locktimers[k];
 		}
-		long long avg_wait_per_lock = total_wait_time/numthreads; // Each thread only had one lock op
+		// Each thread had numiters for insertion and deletion, numlists for list length
+		long long avg_wait_per_lock = total_wait_time/((numIters*2+numlists)*numthreads);
 		fprintf(stdout, ",%lld", avg_wait_per_lock);
 	}
 
