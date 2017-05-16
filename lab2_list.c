@@ -86,7 +86,7 @@ void make_keys(){
 		elements[i].key = rand_key;
 
 		// Free allocated memory
-		free(rand_key);
+		//free(rand_key);
 	}
 }
 

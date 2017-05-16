@@ -11,7 +11,7 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element){
 
 	// Start from where head's (list) next is pointing to
 	SortedListElement_t *curr = list->next;
-	
+
 	// Iterate through list until element can be placed in correct position
 	// or until we loop back to the head
 	while(curr != list){
