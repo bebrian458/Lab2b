@@ -136,18 +136,18 @@ tests: build
 	./lab2_list --threads=12 --iterations=32 --yield=il --sync=s >> lab2_list.csv
 	./lab2_list --threads=12 --iterations=32 --yield=dl --sync=s >> lab2_list.csv
 #
-	./lab2_list --threads=1  --iterations=1000          >> lab2_list.csv
-	./lab2_list --threads=1  --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=2  --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=4  --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=8  --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=12 --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=16 --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=24 --iterations=1000 --sync=m >> lab2_list.csv
-	./lab2_list --threads=1  --iterations=1000 --sync=s >> lab2_list.csv
-	./lab2_list --threads=2  --iterations=1000 --sync=s >> lab2_list.csv
-	./lab2_list --threads=4  --iterations=1000 --sync=s >> lab2_list.csv
-	./lab2_list --threads=8  --iterations=1000 --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=1  --iterations=1000          >> lab2_list.csv
+	# ./lab2_list --threads=1  --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=2  --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=4  --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=8  --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=12 --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=16 --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=24 --iterations=1000 --sync=m >> lab2_list.csv
+	# ./lab2_list --threads=1  --iterations=1000 --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=2  --iterations=1000 --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=4  --iterations=1000 --sync=s >> lab2_list.csv
+	# ./lab2_list --threads=8  --iterations=1000 --sync=s >> lab2_list.csv
 	# ./lab2_list --threads=12 --iterations=1000 --sync=s >> lab2_list.csv
 	# ./lab2_list --threads=16 --iterations=1000 --sync=s >> lab2_list.csv
 	# ./lab2_list --threads=24 --iterations=1000 --sync=s >> lab2_list.csv
@@ -261,6 +261,9 @@ tests: build
 	./lab2_list --threads=12 --iterations=1000 --lists=4  --sync=s >> lab2_list.csv
 	./lab2_list --threads=12 --iterations=1000 --lists=8  --sync=s >> lab2_list.csv
 	./lab2_list --threads=12 --iterations=1000 --lists=16 --sync=s >> lab2_list.csv
+
+	./lab2_list --threads=24 --iterations=1000 --sync=m >> lab2_list.csv
+	./lab2_list --threads=24 --iterations=1000 --sync=s >> lab2_list.csv
 
 
 graphs: build
