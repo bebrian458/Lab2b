@@ -68,12 +68,12 @@ set ylabel "successful iterations"
 set logscale y 10
 set output 'lab2b_3.png'
 plot \
-    "< grep -e 'list-id-none,[0-9]*,[0-9]*,4' lab2_list.csv" using ($2):($3) \
-	title "Unprotected" with linespoints lc rgb "red", \
-    "< grep -e 'list-id-m,[0-9]*,[0-9]*,4' lab2_list.csv" using ($2):($3) \
-	title "Mutex" with linespoints lc rgb "green", \
-    "< grep -e 'list-id-s,[0-9]*,[0-9]*,4' lab2_list.csv" using ($2):($3) \
-	title "Spin-Lock" with linespoints lc rgb "blue" 
+    "< grep -E 'list-id-none,[0-9]*,[0-9]*,4' lab2_list.csv" using ($2):($3) \
+	title "Unprotected" with points lc rgb "blue", \
+    "< grep -E 'list-id-m,[0-9]*,[0-9]*,4' lab2_list.csv" using ($2):($3) \
+	title "Mutex" with points lc rgb "yellow", \
+    "< grep -E 'list-id-s,[0-9]*,[0-9]*,4' lab2_list.csv" using ($2):($3) \
+	title "Spin-Lock" with points lc rgb "red" 
 
 #    
 # "no valid points" is possible if even a single iteration can't run
@@ -88,13 +88,13 @@ set logscale y 10
 set output 'lab2b_4.png'
 # note that unsuccessful runs should have produced no output
 plot \
-     "< grep -e 'list-none-m,[0-9]*,1000,1' lab2_list.csv" using ($2):(1000000000/($7)) \
-	title '1 list' with linespoints lc rgb 'green' \
-	 "< grep -e 'list-none-m,[0-9]*,1000,4' lab2_list.csv" using ($2):(1000000000/($7)) \
-	title '4 lists' with linespoints lc rgb 'red' \
-	 "< grep -e 'list-none-m,[0-9]*,1000,8' lab2_list.csv" using ($2):(1000000000/($7)) \
-	title '8 lists' with linespoints lc rgb 'blue' \
-	 "< grep -e 'list-none-m,[0-9]*,1000,16' lab2_list.csv" using ($2):(1000000000/($7)) \
+     "< grep -E \"list-none-m,[0-9],1000,1,|list-none-m,12,1000,1,\" lab2_list.csv" using ($2):(1000000000/($7)) \
+	title '1 list' with linespoints lc rgb 'green', \
+	 "< grep -E 'list-none-m,[0-9]*,1000,4,' lab2_list.csv" using ($2):(1000000000/($7)) \
+	title '4 lists' with linespoints lc rgb 'red', \
+	 "< grep -E 'list-none-m,[0-9]*,1000,8,' lab2_list.csv" using ($2):(1000000000/($7)) \
+	title '8 lists' with linespoints lc rgb 'blue', \
+	 "< grep -E 'list-none-m,[0-9]*,1000,16,' lab2_list.csv" using ($2):(1000000000/($7)) \
 	title '16 lists' with linespoints lc rgb 'blue'
 
 set title "List-5: Throughput vs. Number of Threads for Multiple Lists (sync=s)"
@@ -106,12 +106,12 @@ set logscale y 10
 set output 'lab2b_5.png'
 # note that unsuccessful runs should have produced no output
 plot \
-     "< grep -e 'list-none-s,[0-9]*,1000,1' lab2_list.csv" using ($2):(1000000000/($7)) \
-	title '1 list' with linespoints lc rgb 'green' \
-	 "< grep -e 'list-none-s,[0-9]*,1000,4' lab2_list.csv" using ($2):(1000000000/($7)) \
-	title '4 lists' with linespoints lc rgb 'red' \
-	 "< grep -e 'list-none-s,[0-9]*,1000,8' lab2_list.csv" using ($2):(1000000000/($7)) \
-	title '8 lists' with linespoints lc rgb 'blue' \
-	 "< grep -e 'list-none-s,[0-9]*,1000,16' lab2_list.csv" using ($2):(1000000000/($7)) \
+     "< grep -E \"list-none-s,[0-9],1000,1,|list-none-s,12,1000,1,\" lab2_list.csv" using ($2):(1000000000/($7)) \
+	title '1 list' with linespoints lc rgb 'green', \
+	 "< grep -E 'list-none-s,[0-9]+,1000,4,' lab2_list.csv" using ($2):(1000000000/($7)) \
+	title '4 lists' with linespoints lc rgb 'red', \
+	 "< grep -E 'list-none-s,[0-9]+,1000,8,' lab2_list.csv" using ($2):(1000000000/($7)) \
+	title '8 lists' with linespoints lc rgb 'blue', \
+	 "< grep -E 'list-none-s,[0-9]+,1000,16,' lab2_list.csv" using ($2):(1000000000/($7)) \
 	title '16 lists' with linespoints lc rgb 'yellow'
 	 
