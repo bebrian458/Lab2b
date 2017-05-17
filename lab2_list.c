@@ -124,6 +124,7 @@ void* worker(void* tID){
 	int i;
 	for(i = *(int*)tID; i < numelems; i+= numthreads){
 		sublist = &sublist_arr[hash(elements[i].key) % numlists];
+		long long wait_time;
 		switch(m_sync){
 			
 			// Mutex
@@ -142,7 +143,7 @@ void* worker(void* tID){
 				}
 
 				// Calculate wait time
-				long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+				wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
 				locktimers[*(int*)tID] += wait_time;
 
 				SortedList_insert(&sublist->list, &elements[i]);
@@ -152,8 +153,23 @@ void* worker(void* tID){
 			// Spin-lock
 			case 's':
 				curr_spin_lock = &sublist->spin_lock;
+
+				// Time the wait for thread to acquire spin-lock
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+					fprintf(stderr, "Error getting lock start time\n");
+					exit(1);
+				}
 				while(__sync_lock_test_and_set(curr_spin_lock, 1))
 					;
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+					fprintf(stderr, "Error getting lock end time\n");
+					exit(1);
+				}
+
+				// Calculate wait time
+				wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+				locktimers[*(int*)tID] += wait_time;
+
 				SortedList_insert(&sublist->list, &elements[i]);
 				__sync_lock_release(curr_spin_lock);
 				break;
@@ -212,6 +228,7 @@ void* worker(void* tID){
 
 	/* Fine Grained Locking */
 	int listlen = 0, k = 0, ret = 0;
+	long long wait_time;
 	switch(m_sync){
 		
 		// Mutex
@@ -232,7 +249,7 @@ void* worker(void* tID){
 				exit(1);
 			}
 			// Calculate wait time
-			long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+			wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
 			locktimers[*(int*)tID] += wait_time;
 
 			// Then, safely iterate the list without sudden updates
@@ -254,12 +271,24 @@ void* worker(void* tID){
 		// Spin-lock
 		case 's':
 
+			// Time the wait for thread to acquire spin-lock
+			if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+				fprintf(stderr, "Error getting lock start time\n");
+				exit(1);
+			}
 			// First, acquire all of the locks
 			for(k = 0; k < numlists; k++){
 				curr_spin_lock = &sublist_arr[k].spin_lock;
 				while(__sync_lock_test_and_set(curr_spin_lock, 1))
 					;
 			}
+			if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+				fprintf(stderr, "Error getting lock end time\n");
+				exit(1);
+			}
+			// Calculate wait time
+			wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+			locktimers[*(int*)tID] += wait_time;
 
 			// Then safely iterate the list without sudden updates
 			for(k = 0; k < numlists; k++){
@@ -342,6 +371,7 @@ void* worker(void* tID){
 
 		sublist = &sublist_arr[hash(elements[j].key) % numlists];
 		SortedListElement_t *ret_elem;
+		long long wait_time;
 
 //		fprintf(stderr, "After sublist\n");
 		switch(m_sync){
@@ -362,7 +392,7 @@ void* worker(void* tID){
 				}
 
 				// Calculate wait time
-				long long wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+				wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
 				locktimers[*(int*)tID] += wait_time;
 
 				ret_elem = SortedList_lookup(&sublist->list, elements[j].key);
@@ -380,8 +410,23 @@ void* worker(void* tID){
 			// Spin-lock
 			case 's':
 				curr_spin_lock = &sublist->spin_lock;
+
+				// Time the wait for thread to acquire spin-lock
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_start) == -1){
+					fprintf(stderr, "Error getting lock start time\n");
+					exit(1);
+				}
 				while(__sync_lock_test_and_set(curr_spin_lock, 1))
 					;
+				if(clock_gettime(CLOCK_MONOTONIC, &lock_end) == -1){
+					fprintf(stderr, "Error getting lock end time\n");
+					exit(1);
+				}
+
+				// Calculate wait time
+				wait_time = 1000000000 * (lock_end.tv_sec - lock_start.tv_sec) + (lock_end.tv_nsec - lock_start.tv_nsec);
+				locktimers[*(int*)tID] += wait_time;
+
 				ret_elem = SortedList_lookup(&sublist->list, elements[j].key);
 				if(ret_elem == NULL){
 					fprintf(stderr, "Error looking up element for deletion\n");
@@ -691,7 +736,7 @@ int main(int argc, char *argv[]){
 
 	// Calculations for avg mutex acquiring time
 	long long avg_wait_per_lock = 0;
-	if(m_sync == 'm'){
+	if(m_sync == 'm' || m_sync == 's'){
 		long long total_wait_time = 0;
 		int k = 0;
 		for(k = 0; k < numthreads; k++){

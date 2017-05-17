@@ -87,7 +87,7 @@ set title "List-4: Throughput vs. Number of Threads for Multiple Lists (sync=m)"
 set xlabel "Threads"
 set logscale x 2
 set xrange [0.75:]
-set ylabel "Time"
+set ylabel "Throughput"
 set logscale y 10
 set output 'lab2b_4.png'
 # note that unsuccessful runs should have produced no output
@@ -105,7 +105,7 @@ set title "List-5: Throughput vs. Number of Threads for Multiple Lists (sync=s)"
 set xlabel "Threads"
 set logscale x 2
 set xrange [0.75:]
-set ylabel "Time"
+set ylabel "Throughput"
 set logscale y 10
 set output 'lab2b_5.png'
 # note that unsuccessful runs should have produced no output
