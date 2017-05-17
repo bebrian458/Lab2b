@@ -1,3 +1,7 @@
+// NAME: Brian Be
+// EMAIL: bebrian458@gmail.com
+// ID: 204612203
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>	
@@ -686,6 +690,7 @@ int main(int argc, char *argv[]){
 		message,numthreads,numIters,numlists,numops,total_time,avg_time_per_op);
 
 	// Calculations for avg mutex acquiring time
+	long long avg_wait_per_lock = 0;
 	if(m_sync == 'm'){
 		long long total_wait_time = 0;
 		int k = 0;
@@ -693,9 +698,11 @@ int main(int argc, char *argv[]){
 			total_wait_time += locktimers[k];
 		}
 		// Each thread had numiters for insertion and deletion, numlists for list length
-		long long avg_wait_per_lock = total_wait_time/((numIters*2+numlists)*numthreads);
-		fprintf(stdout, ",%lld", avg_wait_per_lock);
+		avg_wait_per_lock = total_wait_time/((numIters*2+numlists)*numthreads);
 	}
+	
+	// All other cases should have 0 for the 8th column
+	fprintf(stdout, ",%lld", avg_wait_per_lock);
 
 	// End of message
 	fprintf(stdout, "\n");
